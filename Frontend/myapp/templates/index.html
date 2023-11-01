@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+    <title>Proyecto 3 IPC2</title>
+
+    <style>
+        /* Estilos personalizados para la barra de navegación */
+        .navbar {
+            border-bottom: 1px solid #e5e5e5;
+            /* Añade una línea en la parte inferior de la barra de navegación */
+        }
+
+        .nav-item a {
+            margin-right: 15px;
+            /* Añade un margen a la derecha de cada enlace */
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            /* Hace el título de la app (Mi App) en negritas */
+        }
+    </style>
+</head>
+
+<header>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Proyecto 3 IPC2</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload_m">Carga Mensajes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload_c">Carga Configuracion</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/limpiar_datos">Resetear Datos</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="consultaDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Consultas
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="consultaDropdown">
+                        <a class="dropdown-item" href="/get_hashtags">Consultar Hashtags</a>
+                        <a class="dropdown-item" href="/get_menciones">Consultar Menciones</a>
+                        <a class="dropdown-item" href="/get_sentimientos">Consultar Sentimientos</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="consultaDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Graficas
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="consultaDropdown">
+                        <a class="dropdown-item" href="/stats_hashtags">Grafica Hashtags</a>
+                        <a class="dropdown-item" href="/stats_menciones">Grafica Menciones</a>
+                        <a class="dropdown-item" href="/stats_sentimientos">Grafica Sentimientos</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="ayudaDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        Ayuda
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="ayudaDropdown">
+                        <a class="dropdown-item" href="/info_estudiante">Información del Estudiante</a>
+                        <a class="dropdown-item" href="/documentacion">Documentación</a>
+                    </div>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</header>
+
+<main role="main">{% block content %}{% endblock %}</main>
+{% block extra_js %}{% endblock %}
+
+</html>

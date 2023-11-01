@@ -1,0 +1,126 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi CV</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+</head>
+
+<body>
+    <main role="main" class="center-content">
+        <section role="main" class="container_16">
+
+            <div class="left-column">
+                <figure>
+                    <img src="https://i.imgur.com/7Ccyuia.jpg" alt="Jairo Adelso Gómez Hernández">
+                </figure>
+                <h1 class="fadeInDown">Jairo Adelso Gomez Hernandez</h1>
+                <h4>Edad: 24 años</h4>
+                <h4>Grado: 4to Semestre Ingenieria en Ciencias y Sistemas</h4>
+                <h4>Ciudad de Guatemala </h4>
+
+
+                <p>Estudiante de Ingenieria en Ciencias y Sistemas, mi formacion se enforca en la innovacion y
+                    aprendizaje
+                    de
+                    nuevas tecnologias, en el desarrollo habilidades en programación, análisis de datos y solución de
+                    problemas
+                    complejos. Tengo interés en los avances tecnologicos, como la inteligencia artificial, el
+                    aprendizaje
+                    automático y la ciberseguridad. </p>
+
+
+                <h3>Contacto</h3>
+                <h4>Telefono: 36408805</h4>
+                <h4><a href="mailto:2993206770101@ingenieria.usac.edu.gt"></a></h4>
+                <h4>Correo: jairoogomez@gmail.com</h4>
+                <div class="social-container">
+
+                    <a href="mailto:2993206770101@ingenieria.usac.edu.gt"><img class="social"
+                            src="https://imgur.com/FyuhhGf.png" alt="Email"></a>
+                    <a href="https://github.com/JairoGH"><img class="social"
+                            src="https://pngimg.com/uploads/github/github_PNG40.png" alt="Github"></a>
+                    <a href="https://www.facebook.com/jairo.gomez.31"><img class="social"
+                            src="https://imgur.com/jKIJuCJ.png" alt="Facebook"></a>
+                </div>
+
+
+                <h3>Habilidades</h3>
+                <ul class="values">
+                    <li>
+                        Python <span style="width: 80%;"></span>
+                    </li>
+                    <li>
+                        Java <span style="width: 70%;"></span>
+                    </li>
+                    <li>
+                        HTML5 / CSS <span style="width: 70%;"></span>
+                    </li>
+                    <li>
+                        Flask <span style="width: 70%;"></span>
+                    <li>
+                        Git <span style="width: 80%;"></span>
+                    </li>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="right-column">
+
+                <h3>Formación Academica</h3>
+                <div class="formation1">
+                    <ul>
+                        <li>
+                            <h4><strong>Bachillerato en Computacion con Orientacion Comercial </strong></h4>
+                            <span class="site">Liceo Preuniversitario de Computacion</span>
+                            <span class="date">2017</span>
+                        </li>
+                        <li>
+                            <h4><strong>Curso Programa Académico Preparatorio</strong></h4>
+                            <span class="site">Universidad de San Carlos de Guatemala.</span>
+                            <span class="date">2018</span>
+                        </li>
+                        <li>
+                            <h4><strong>En curso, Ingenieria de Ciencias y Sistemas</strong></h4>
+                            <span class="site">Universidad de San Carlos de Guatemala</span>
+                            <span class="date">2019</span>
+                        </li>
+                    </ul>
+                </div>
+
+
+                <h3>Intereses</h3>
+                <div class="interests">
+                    <ul>
+                        <li>Inglés nivel Medio</li>
+                        <li>Desarrollo Web</li>
+                        <li>Aprendizaje rápido en nuevas tecnologías</li>
+                        <li>Facilidad para trabajar en equipo</li>
+                        <li>Autodidacta</li>
+                        <li>Deportes: Practico regularmente el fútbol y ejercicios de fuerza para mantener un estilo de
+                            vida
+                            activo
+                            y saludable.</li>
+                        <li>Música: Disfruto explorando diversos géneros musicales.</li>
+                        <li>Videojuegos: Apasionado por los videojuegos, lo que ha mejorado mi capacidad de resolución
+                            de
+                            problemas
+                            y trabajo en equipo.</li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </section>
+</body>
+</main>
+<main role="main">{% block content %}{% endblock %}</main>
+<a href="{% url 'index' %}" class="btn btn-primary">Regresar</a>
+
+</body>
+
+</html>

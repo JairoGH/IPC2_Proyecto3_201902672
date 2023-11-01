@@ -1,0 +1,50 @@
+{% extends "index.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Hashtags</h2>
+
+    <!-- Formulario para seleccionar un intervalo de fechas -->
+    <form action="" method="get">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="startDate">Fecha de inicio:</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ startDate }}">
+            </div>
+            <div class="col-md-6">
+                <label for="endDate">Fecha de fin:</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ endDate }}">
+            </div>
+        </div>
+        <button class="btn btn-primary mt-3" type="submit">Buscar</button>
+        <button class="btn btn-secondary mt-3" type="reset">Restablecer</button>
+    </form>
+
+    <!-- Tabla -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Hashtag</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for hashtag in hashtags %}
+            <tr>
+                <td>{{ hashtag.FECHA }}</td>
+                <td>
+                    {% for hashtag_part in hashtag.HASHTAGS %}
+                    {% if forloop.counter0|divisibleby:2 %}
+                    {{ hashtag_part }}:
+                    {% else %}
+                    {{ hashtag_part }} mensaje(s)<br>
+                    {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

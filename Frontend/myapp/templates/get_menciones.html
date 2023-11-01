@@ -1,0 +1,46 @@
+{% extends "index.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Menciones de Usuarios</h2>
+
+    <!-- Formulario para seleccionar un intervalo de fechas -->
+    <form action="" method="get">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="startDate">Fecha de inicio:</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ startDate }}">
+            </div>
+            <div class="col-md-6">
+                <label for="endDate">Fecha de fin:</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ endDate }}">
+            </div>
+        </div>
+        <button class="btn btn-primary mt-3" type="submit">Buscar</button>
+        <button class="btn btn-secondary mt-3" type="reset">Restablecer</button>
+    </form>
+
+    <!-- Tabla -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Usuarios Mencionados</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mencion in menciones %}
+            <tr>
+                <td>{{ mencion.Fecha }}</td>
+                <td>
+                    {% for usuario, menciones in mencion.usuarios.items %}
+                    {{ usuario }}: {{ menciones }} mensaje(s)<br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

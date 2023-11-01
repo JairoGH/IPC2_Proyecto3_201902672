@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Estadísticas de Hashtags</h2>
+    <div class="row">
+        <!-- Tarjeta para estadísticas de hashtags -->
+        <div class="col-md-12">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-header">Estadísticas de Hashtags</div>
+                <div class="card-body">
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('statsChart').getContext('2d');
+
+    // Obtén los datos de la respuesta JSON (reemplaza esto con los datos reales de tu respuesta)
+    const response = {{ response| safe }};
+
+    // Crear un objeto para almacenar el recuento total de hashtags por fecha
+    const hashtagsCountByDate = {};
+
+    // Procesar los datos y calcular el recuento total de hashtags por fecha
+    response.forEach(data => {
+        const fecha = data.FECHA;
+        const hashtags = data.HASHTAGS;
+        const totalHashtags = hashtags.reduce((total, hashtag) => total + hashtag.count, 0);
+        hashtagsCountByDate[fecha] = totalHashtags;
+    });
+
+    const labels = Object.keys(hashtagsCountByDate);
+    const dataValues = Object.values(hashtagsCountByDate);
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Recuento Total de Hashtags',
+                data: dataValues,
+                backgroundColor: 'rgba(255, 140, 0, 0.5)', // Color de barras
+                borderColor: 'rgba(23, 162, 184, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    beginAtZero: true,
+                }
+            }
+        }
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,52 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Limpiar Datos</h2>
+
+    <div class="form-group mt-4">
+        <label for="xmlResult">Resultado:</label>
+        <textarea class="form-control" id="xmlResult" name="xmlResult" rows="10" disabled></textarea>
+    </div>
+
+    <button id="clearButton" class="btn btn-secondary mt-4">Limpiar Datos</button>
+</div>
+
+<script>
+    const clearButton = document.getElementById("clearButton");
+    const xmlResult = document.getElementById("xmlResult");
+
+    clearButton.addEventListener("click", function () {
+        // Realizar la solicitud POST a la vista 'limpiar_datos'
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie("csrftoken") // Asegúrate de incluir la protección CSRF
+            },
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Mostrar la respuesta XML en el área de resultado
+                xmlResult.value = data;
+            })
+            .catch(error => {
+                console.error("Error al enviar la solicitud: " + error);
+            });
+    });
+
+    // Función para obtener el valor de la cookie CSRF
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock content %}

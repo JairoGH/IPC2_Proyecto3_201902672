@@ -1,0 +1,27 @@
+<MENSAJES>
+        <MENSAJE>
+                <FECHA> Guatemala, 25/10/2023 20:05 hrs. </FECHA>
+                <TEXTO> Bienvenido al Colegio @estudiante01 @estudiante02, es un gusto que seas parte de esta institucion #bienvenida#
+                </TEXTO>
+                <USUARIO_EN_MENSAJE>@estudiante01</USUARIO_EN_MENSAJE>
+                <USUARIO_EN_MENSAJE>@estudiante02</USUARIO_EN_MENSAJE>
+                <HASHTAG_EN_MENSAJE>#bienvenida#</HASHTAG_EN_MENSAJE>
+        </MENSAJE>
+        <MENSAJE>
+                <FECHA> Guatemala, 26/10/2023 22:15 hrs. </FECHA>
+                <TEXTO> Bienvenido al Liceo @estudiante01 @estudiante02, es un gusto que seas parte de esta institucion #bienvenidaLiceo#
+                </TEXTO>
+                <USUARIO_EN_MENSAJE>@estudiante01</USUARIO_EN_MENSAJE>
+                <USUARIO_EN_MENSAJE>@estudiante02</USUARIO_EN_MENSAJE>
+                <HASHTAG_EN_MENSAJE>#bienvenidaLiceo#</HASHTAG_EN_MENSAJE>
+        </MENSAJE>
+        <MENSAJE>
+                <FECHA> Guatemala, 27/10/2023 20:05 hrs. </FECHA>
+                <TEXTO> Bienvenido al Colegio @estudiante03 @estudiante04, es un gusto que seas parte de esta universidad #usac# #feliz#
+                </TEXTO>
+                <USUARIO_EN_MENSAJE>@estudiante03</USUARIO_EN_MENSAJE>
+                <USUARIO_EN_MENSAJE>@estudiante04</USUARIO_EN_MENSAJE>
+                <HASHTAG_EN_MENSAJE>#usac#</HASHTAG_EN_MENSAJE>
+                <HASHTAG_EN_MENSAJE>#feliz#</HASHTAG_EN_MENSAJE>
+        </MENSAJE>
+</MENSAJES>

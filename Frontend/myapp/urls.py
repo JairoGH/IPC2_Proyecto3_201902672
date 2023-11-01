@@ -10,5 +10,6 @@ urlpatterns = [
     path('get_hashtags/', views.get_hashtags, name='get_hashtags'),
     path('get_menciones/', views.get_menciones, name='get_menciones'),
     path('stats_hashtags/', views.stats_hashtags, name='stats_hashtags'),
+    path('stats_menciones/', views.stats_menciones, name='stats_menciones'),
     path('info_estudiante/', views.info_estudiante, name='info_estudiante'),
 ]

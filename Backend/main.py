@@ -314,21 +314,24 @@ def get_hashtags():
     # Filtrar los resultados por fecha en formato "DD/MM/YYYY"
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
-    
+
     if start_date_str and end_date_str:
         filtered_results = []
         start_date = datetime.strptime(start_date_str, "%d/%m/%Y")
         end_date = datetime.strptime(end_date_str, "%d/%m/%Y")
-        
+
         for msg in result_msg:
             msg_date = datetime.strptime(msg['FECHA'], "%d/%m/%Y")
             if start_date <= msg_date <= end_date:
                 filtered_results.append(msg)
 
-    # Crear una lista de hashtags y sus conteos
-    hashtags_list = [{"hashtag": hashtag, "count": count} for hashtag, count in hashtags_existentes.items()]
+        # Crear una lista de hashtags y sus conteos para los mensajes filtrados
+        hashtags_list = [{"hashtag": hashtag, "count": count} for msg in filtered_results for hashtag, count in zip(msg['HASHTAGS'][::2], msg['HASHTAGS'][1::2])]
 
-    return jsonify(result_msg), 200
+        return jsonify(filtered_results), 200
+    else:
+        # Si no se proporcionaron fechas de inicio y fin, devolver todos los resultados
+        return jsonify(result_msg), 200
 
 
 #Metodo GET que devolvera los Usuarios grabados con su fecha y en cuantos mensajes se menciono  
@@ -395,8 +398,7 @@ def stats_hashtags():
     tree = ET.parse(xml_file)
     elementos = tree.getroot()
     
-    hashtags_existentes = defaultdict(int)
-    hashtag_data = []
+    hashtag_data = defaultdict(list)
 
     for elemento in elementos.findall('MENSAJE'):
         fecha_text = elemento.find('FECHA').text
@@ -407,17 +409,70 @@ def stats_hashtags():
         hashtags = [hashtag.lower() for hashtag in re.findall(r'#\w+#', cont_msg)]
 
         for hashtag in hashtags:
-            hashtags_existentes[hashtag] += 1
+            hashtag_data[fecha].append(hashtag)
 
+    # Convertir el diccionario a un formato de respuesta
+    response_data = []
+    for fecha, hashtags in hashtag_data.items():
+        hashtags_count = {hashtag: hashtags.count(hashtag) for hashtag in set(hashtags)}
         msg_data = {
             "FECHA": fecha,
-            "HASHTAGS": [{"hashtag": hashtag, "count": hashtags_existentes[hashtag]} for hashtag in hashtags]
+            "HASHTAGS": [{"hashtag": hashtag, "count": count} for hashtag, count in hashtags_count.items()]
         }
+        response_data.append(msg_data)
 
-        hashtag_data.append(msg_data)
+    return jsonify(response_data), 200
 
-    return jsonify(hashtag_data), 200
+# Método GET que devolverá los usuarios mencionados con su fecha y cuántas veces fueron mencionados
+@app.route('/stats_menciones', methods=['GET'])
+def stats_menciones():
+    # Comprobar si el archivo XML existe
+    if not os.path.exists(xml_file):
+        return jsonify({"message": "No existe el archivo XML"}), 404
 
+    # Cargar el XML existente
+    tree = ET.parse(xml_file)
+    elementos = tree.getroot()
+    menciones_por_fecha = defaultdict(list)
+
+    # Recorrer los mensajes
+    for elemento in elementos.findall('MENSAJE'):
+        mensaje_text = elemento.find('TEXTO').text
+        fecha_text = elemento.find('FECHA').text
+        fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()
+
+        # Encuentra menciones en el mensaje (suponiendo que las menciones tienen el formato '@usuario')
+        menciones = re.findall(r'@(\w+)', mensaje_text)
+
+        for mencion in menciones:
+            menciones_por_fecha[fecha].append(mencion)
+
+    # Filtrar los resultados por fecha en formato "DD/MM/YYYY"
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    if start_date_str and end_date_str:
+        filtered_menciones_por_fecha = {}
+        start_date_obj = datetime.strptime(start_date_str, "%d/%m/%Y")
+        end_date_obj = datetime.strptime(end_date_str, "%d/%m/%Y")
+
+        for fecha, menciones in menciones_por_fecha.items():
+            fecha_obj = datetime.strptime(fecha, "%d/%m/%Y")
+            if start_date_obj <= fecha_obj <= end_date_obj:
+                filtered_menciones_por_fecha[fecha] = menciones
+    else:
+        filtered_menciones_por_fecha = menciones_por_fecha
+
+    # Convierte el diccionario de menciones por fecha a un formato de respuesta
+    result_msg = []
+    for fecha, menciones in filtered_menciones_por_fecha.items():
+        menciones_usuario = defaultdict(int)
+        for mencion in menciones:
+            menciones_usuario[mencion] += 1
+
+        result_msg.append({"Fecha": fecha, "usuarios": menciones_usuario})
+
+    return jsonify(result_msg), 200
 
 #Metodo que inicia la aplicacion
 if __name__ == '__main__':

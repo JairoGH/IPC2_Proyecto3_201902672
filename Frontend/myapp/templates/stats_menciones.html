@@ -2,12 +2,12 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Estadísticas de Hashtags</h2>
+    <h2>Estadísticas de Usuarios Mencionados</h2>
     <div class="row">
-        <!-- Tarjeta para estadísticas de hashtags -->
+        <!-- Tarjeta para estadísticas de usuarios mencionados -->
         <div class="col-md-12">
             <div class="card card-bg text-white mb-3">
-                <div class="card-title">Estadísticas de Hashtags</div>
+                <div class="card-title">Estadísticas de Usuarios Mencionados</div>
                 <div class="card-body">
                     <canvas id="statsChart"></canvas>
                 </div>
@@ -17,22 +17,22 @@
 </div>
 <div class="row">
     <div class="col-md-12">
-        <h3 class="hashtag-title">Hashtags Utilizados en Cada Mensaje</h3>
+        <h3 class="usuario-title">Usuarios Mencionados en Cada Mensaje</h3>
         <table class="table table-bordered table-centered">
             <thead>
                 <tr>
                     <th>Fecha</th>
-                    <th>Hashtags</th>
+                    <th>Usuario</th>
                 </tr>
             </thead>
             <tbody>
-                {% for data in hashtags_data %}
+                {% for data in usuarios_data %}
                 <tr>
                     <td>{{ data.fecha|date:"F j, Y" }}</td>
                     <td>
                         <ul>
-                            {% for hashtag_info in data.hashtags %}
-                            <li>{{ hashtag_info.hashtag }} ({{ hashtag_info.count }} veces)</li>
+                            {% for usuario_info in data.usuarios.items %}
+                            <li>{{ usuario_info.0 }} ({{ usuario_info.1 }} veces)</li>
                             {% endfor %}
                         </ul>
                     </td>
@@ -51,26 +51,26 @@
     // Obtén los datos de la respuesta JSON (reemplaza esto con los datos reales de tu respuesta)
     const response = {{ response| safe }};
 
-    // Crear un objeto para almacenar el recuento total de hashtags por fecha
-    const hashtagsCountByDate = {};
+    // Crear un objeto para almacenar el recuento total de usuarios mencionados por fecha
+    const usuariosCountByDate = {};
 
-    // Procesar los datos y calcular el recuento total de hashtags por fecha
+    // Procesar los datos y calcular el recuento total de usuarios mencionados por fecha
     response.forEach(data => {
-        const fecha = data.FECHA;
-        const hashtags = data.HASHTAGS;
-        const totalHashtags = hashtags.reduce((total, hashtag) => total + hashtag.count, 0);
-        hashtagsCountByDate[fecha] = totalHashtags;
+        const fecha = data.Fecha;
+        const usuarios = data.usuarios;
+        const totalUsuarios = Object.values(usuarios).reduce((total, count) => total + count, 0);
+        usuariosCountByDate[fecha] = totalUsuarios;
     });
 
-    const labels = Object.keys(hashtagsCountByDate);
-    const dataValues = Object.values(hashtagsCountByDate);
+    const labels = Object.keys(usuariosCountByDate);
+    const dataValues = Object.values(usuariosCountByDate);
 
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Recuento Total de Hashtags',
+                label: 'Recuento de Usuarios Mencionados',
                 data: dataValues,
                 backgroundColor: 'rgba(23, 162, 184, 0.5)', // Color de barras personalizado
                 borderColor: 'rgba(100, 100, 100, 100)',

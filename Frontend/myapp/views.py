@@ -190,11 +190,44 @@ def info_estudiante(request):
 
 def stats_hashtags(request):
     contexto = {
-        'response': []
+        'response': [],
+        'hashtags_data': []  # Agrega esta variable para los hashtags utilizados
     }
     response = requests.get(url + "/stats_hashtags")
     
     if response.status_code == 200:
-        contexto['response'] = response.json()
+        data = response.json()
+        contexto['response'] = data
+        hashtags_data = []
+
+        # Itera a través de los datos para obtener los hashtags y su conteo
+        for item in data:
+            fecha = item['FECHA']
+            hashtags = item['HASHTAGS']
+            hashtags_data.append({'fecha': fecha, 'hashtags': hashtags})
+
+        contexto['hashtags_data'] = hashtags_data
         
     return render(request, "stats_hashtags.html", contexto)
+
+def stats_menciones(request):
+    contexto = {
+        'response': [],
+        'usuarios_data': []  # Agrega esta variable para los usuarios mencionados
+    }
+    response = requests.get(url + "/stats_menciones")
+    
+    if response.status_code == 200:
+        data = response.json()
+        contexto['response'] = data
+        usuarios_data = []
+
+        # Itera a través de los datos para obtener los usuarios mencionados y su conteo
+        for item in data:
+            fecha = item['Fecha']
+            usuarios = item['usuarios']
+            usuarios_data.append({'fecha': fecha, 'usuarios': usuarios})
+
+        contexto['usuarios_data'] = usuarios_data
+        
+    return render(request, "stats_menciones.html", contexto)

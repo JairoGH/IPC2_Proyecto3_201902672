@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 import os
 import json
 import requests
+from unidecode import unidecode
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from collections import defaultdict
@@ -18,14 +19,19 @@ url = "http://localhost:5000"
 def index(request):
     return render(request, "index.html")
 
-
+#Funcion para cargar los datos de mensajes de la API
 def upload_m(request):
     response_content = None
     if request.method == "POST":
-        xml_file = request.FILES.get('xmlFile')  # Obtener el archivo XML cargado
+        # Obtener el archivo XML cargado
+        xml_file = request.FILES.get('xmlFile')  
         if xml_file:
-            content = xml_file.read().decode('utf-8')  # Leer y decodificar el contenido del archivo
+            content = xml_file.read().decode('utf-8')           
+            #Convertir a UTF-8
+            content = unidecode(content)
+
             print(content)
+
             # Hacer petición a la API
             api_url = url + "/grabarMensajes"
             headers = {
@@ -33,24 +39,27 @@ def upload_m(request):
             }
             response = requests.post(api_url, data=content, headers=headers)
             
-            # Aquí puedes manejar la respuesta como lo necesites
+            # Verificar la respuesta de la API
             if response.status_code == 200:
                 response_content = response.text
             else:
-                # Puedes manejar errores de manera más específica aquí si lo necesitas
                 return JsonResponse({"error": "Error al enviar datos a la API."}, status=400)
-    return render(request, 'upload_m.html', {'response_content': response_content})  # Enviar el contenido de la respuesta al template
+                # Enviar el contenido de la respuesta 
+    return render(request, 'upload_m.html', {'response_content': response_content})  
 
+#Funcion para cargar los datos de Config de la API
 def upload_c(request):
     response_content = None
     error_message = None 
 
     if request.method == "POST":
 
-        # Obtener el archivo XML cargado
-        xml_file = request.FILES.get('xmlFile')  
+        #Obtener el archivo XML cargado
+        xml_file = request.FILES.get('xmlFile')
         if xml_file:
             content = xml_file.read().decode('utf-8') 
+            #Convertir a UTF-8
+            content = unidecode(content)
             print(content)
 
             #Se hace la peticion a la API
@@ -60,7 +69,7 @@ def upload_c(request):
             }
             response = requests.post(api_url, data=content, headers=headers)
             
-            # Respuesta de la API
+            #Respuesta de la API
             if response.status_code == 200:
                 response_content = response.text
             else:
@@ -69,12 +78,12 @@ def upload_c(request):
     
     return render(request, 'upload_c.html', {'response_content': response_content, 'error_message': error_message})
         
-
+#Funcion para eliminar los archivos en los que se guadan los datos
 def limpiar_datos(request):
     if request.method == 'POST':
         try:
-            # URL de la API de Flask para borrar archivos
-            api_url = url + "/limpiarDatos"  # Reemplaza con la URL de tu API para borrar archivos
+            #Realizar la peticion a la API
+            api_url = url + "/limpiarDatos" 
             response = requests.post(api_url)
             
             # Verifica la respuesta de la API
@@ -92,11 +101,13 @@ def limpiar_datos(request):
         return render(request, 'limpiar_datos.html')
 
 
-
+#Funcion con la que se obtiene la informacion de los hashtags en los mensajes
 def get_hashtags(request):
+    #Se obtienen las fechas de inicio y fin
     start_date_str = request.GET.get('startDate')
     end_date_str = request.GET.get('endDate')
 
+    #Se crea el contexto, con los hashtags y fecha de inicio y fin
     contexto = {
         'hashtags': [],
         'startDate': start_date_str,
@@ -104,7 +115,7 @@ def get_hashtags(request):
     }
 
     try:
-        # Dar Formato a las fechas en el formato correcto "DD/MM/YYYY"
+        #Dar Formato a las fechas en el formato correcto "DD/MM/YYYY"
         if start_date_str:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").strftime("%d/%m/%Y")
         else:
@@ -115,8 +126,8 @@ def get_hashtags(request):
         else:
             end_date = None
 
-        # URL de la API de Flask para obtener los hashtags
-        api_url = "http://localhost:5000/devolverHashtags"
+        #Se hace la peticion a la API
+        api_url = url + "/devolverHashtags"
         params = {}
         if start_date:
             params['startDate'] = start_date
@@ -125,6 +136,7 @@ def get_hashtags(request):
 
         response = requests.get(api_url, params=params)
 
+        #Verificar la respuesta de la API
         if response.status_code == 200:
             try:
                 # Cargar los hashtags de la respuesta JSON
@@ -135,6 +147,7 @@ def get_hashtags(request):
         else:
             print("Error al obtener los datos de la API")
 
+    #Se verifica el formato de las fechas
     except ValueError as e:
         print("Error al formatear las fechas:", str(e))
 

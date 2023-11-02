@@ -474,6 +474,174 @@ def stats_menciones():
 
     return jsonify(result_msg), 200
 
+
+
+# Ruta GET para obtener mensajes clasificados por sentimiento
+@app.route('/get_messages', methods=['GET'])
+def get_messages():
+    if not os.path.exists(xml_file):
+        return jsonify({"message": "No existe el archivo XML"}), 404
+
+    tree = ET.parse(xml_file)
+    elementos = tree.getroot()
+
+    if not os.path.exists(xml_config):
+        return jsonify({"message": "No existe el archivo config.xml"}), 404
+
+    config_tree = ET.parse(xml_config)
+    config_root = config_tree.getroot()
+
+    sentimientos_positivos = [elem.text for elem in config_root.findall('.//sentimientos_positivos/palabra')]
+    sentimientos_negativos = [elem.text for elem in config_root.findall('.//sentimientos_negativos/palabra')]
+
+    mensajes_por_fecha = defaultdict(lambda: {"positivos": 0, "negativos": 0, "neutros": 0})
+
+    #Recorrer los mensajes
+    for elemento in elementos.findall('MENSAJE'):
+        mensaje_text = elemento.find('TEXTO').text
+        fecha_text = elemento.find('FECHA').text
+        numero_mensaje_element = elemento.find('NUMERO')  # Busca el elemento con el número de mensaje
+
+        if numero_mensaje_element is not None:
+            numero_mensaje = numero_mensaje_element.text
+        else:
+            numero_mensaje = "N/A"  # Establecer "N/A" como número de mensaje si no se encuentra
+
+        fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text)
+
+        if fecha:
+            fecha = fecha.group()
+
+            # Inicializar el diccionario anidado con valores iniciales
+            mensajes_por_fecha[fecha] = {"positivos": 0, "negativos": 0, "neutros": 0, "mensajes_texto": [], "numeros_mensaje": []}
+
+            # Analizar el mensaje en busca de palabras clave de sentimientos
+            palabras = mensaje_text.split()
+            sentimiento = "neutros"
+
+            for palabra in palabras:
+                if palabra in sentimientos_positivos:
+                    sentimiento = "positivos"
+                    break  # Si es positivo, no es necesario seguir buscando
+                elif palabra in sentimientos_negativos:
+                    sentimiento = "negativos"
+                    break  # Si es negativo, no es necesario seguir buscando
+
+            mensajes_por_fecha[fecha][sentimiento] += 1
+            mensajes_por_fecha[fecha]["mensajes_texto"].append(mensaje_text)
+            mensajes_por_fecha[fecha]["numeros_mensaje"].append(numero_mensaje)  # Agregar el texto del mensaje
+
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    if start_date_str and end_date_str:
+        filtered_mensajes_por_fecha = {}
+        start_date_obj = datetime.strptime(start_date_str, "%d/%m/%Y")
+        end_date_obj = datetime.strptime(end_date_str, "%d/%m/%Y")
+
+        for fecha, mensajes in mensajes_por_fecha.items():
+            fecha_obj = datetime.strptime(fecha, "%d/%m/%Y")
+            if start_date_obj <= fecha_obj <= end_date_obj:
+                numeros_mensaje = []  # Lista para almacenar los números de los mensajes
+                mensaje_textos = []  # Lista para almacenar los textos de los mensajes
+                for elemento in elementos.findall('MENSAJE'):
+                    mensaje_text = elemento.find('TEXTO').text
+                    fecha_text = elemento.find('FECHA').text
+                    fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text)
+                    if fecha:
+                        fecha = fecha.group()
+                        if fecha == fecha:
+                            palabras = mensaje_text.split()
+                            numeros = [palabra for palabra in palabras if palabra.isdigit()]
+                            mensaje_textos.append(mensaje_text)
+                            numeros_mensaje.extend(numeros)
+                filtered_mensajes_por_fecha[fecha] = {
+                    "positivos": mensajes["positivos"],
+                    "negativos": mensajes["negativos"],
+                    "neutros": mensajes["neutros"],
+                    "numeros_mensaje": numeros_mensaje,
+                    "mensajes_texto": mensaje_textos
+                }
+    else:
+        filtered_mensajes_por_fecha = mensajes_por_fecha
+
+    # Genera la respuesta JSON
+    result_msg = []
+    for fecha, mensajes in filtered_mensajes_por_fecha.items():
+        fecha_obj = datetime.strptime(fecha, "%d/%m/%Y")
+        fecha_str = fecha_obj.strftime("%d/%m/%Y")
+        positivos = mensajes["positivos"]
+        negativos = mensajes["negativos"]
+        neutros = mensajes["neutros"]
+
+        mensaje_textos = mensajes["mensajes_texto"]  # Acceder al texto de los mensajes
+        mensaje_numeros = mensajes["numeros_mensaje"]  # Acceder a los números de mensaje
+
+        result_msg.append({
+            "FECHA": fecha_str,
+            "MENSAJES_POSITIVOS": positivos,
+            "MENSAJES_NEGATIVOS": negativos,
+            "MENSAJES_NEUTROS": neutros,
+            "MENSAJES_TEXTO": mensaje_textos,
+            "MENSAJES_NUMEROS": mensaje_numeros
+        })
+
+    return jsonify(result_msg), 200
+
+
+# Método GET para devolver estadísticas de sentimientos
+@app.route('/stats_sentimientos', methods=['GET'])
+def stats_sentimientos():
+    if not os.path.exists(xml_file):
+        return jsonify({"message": "No existe el archivo XML"}), 404
+
+    if os.path.getsize(xml_file) == 0:
+        return jsonify({"message": "El archivo XML está vacío"}), 404
+
+    tree = ET.parse(xml_file)
+    elementos = tree.getroot()
+
+    config_tree = ET.parse(xml_config)
+    config_root = config_tree.getroot()
+
+    sentimientos_positivos = [elem.text for elem in config_root.findall('.//sentimientos_positivos/palabra')]
+    sentimientos_negativos = [elem.text for elem in config_root.findall('.//sentimientos_negativos/palabra')]
+
+    sentimiento_data = defaultdict(list)
+
+    for elemento in elementos.findall('MENSAJE'):
+        fecha_text = elemento.find('FECHA').text
+        fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()
+
+        mensaje_text = elemento.find('TEXTO').text
+
+        palabras = mensaje_text.split()
+        sentimiento = "neutros"
+
+        for palabra in palabras:
+            if palabra in sentimientos_positivos:
+                sentimiento = "positivos"
+                break  # Si es positivo, no es necesario seguir buscando
+            elif palabra in sentimientos_negativos:
+                sentimiento = "negativos"
+                break  # Si es negativo, no es necesario seguir buscando
+
+        sentimiento_data[fecha].append(sentimiento)
+
+    # Convertir el diccionario a un formato de respuesta
+    response_data = []
+    for fecha, sentimientos in sentimiento_data.items():
+        sentimientos_count = {"positivos": sentimientos.count("positivos"), "negativos": sentimientos.count("negativos"), "neutros": sentimientos.count("neutros")}
+        msg_data = {
+            "FECHA": fecha,
+            "SENTIMIENTOS": sentimientos_count
+        }
+        response_data.append(msg_data)
+
+    return jsonify(response_data), 200
+
+
+
 #Metodo que inicia la aplicacion
 if __name__ == '__main__':
     app.run(debug = True)

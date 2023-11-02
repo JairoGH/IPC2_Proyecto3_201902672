@@ -12,4 +12,6 @@ urlpatterns = [
     path('stats_hashtags/', views.stats_hashtags, name='stats_hashtags'),
     path('stats_menciones/', views.stats_menciones, name='stats_menciones'),
     path('info_estudiante/', views.info_estudiante, name='info_estudiante'),
+    path('get_sentimientos/', views.get_sentimientos, name='get_sentimientos'),
+    path('stats_sentimientos/', views.stats_sentimientos, name='stats_sentimientos'),
 ]

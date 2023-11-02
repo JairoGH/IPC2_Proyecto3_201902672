@@ -1,0 +1,51 @@
+{% extends "index.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Mensajes Sentimiento</h2>
+
+    <!-- Formulario para seleccionar un intervalo de fechas -->
+    <form action="" method="get">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="startDate">Fecha de inicio:</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ startDate }}">
+            </div>
+            <div class="col-md-6">
+                <label for="endDate">Fecha de fin:</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ endDate }}">
+            </div>
+        </div>
+        <button class="btn btn-primary mt-3" type="submit">Buscar</button>
+        <button class="btn btn-secondary mt-3" type="reset">Restablecer</button>
+    </form>
+
+    <!-- Tabla -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Mensajes Positivos</th>
+                <th>Mensajes Negativos</th>
+                <th>Mensajes Neutros</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mensaje in mensajes %}
+            <tr>
+                <td>{{ mensaje.FECHA }}</td>
+                <td>{{ mensaje.MENSAJES_POSITIVOS }}</td>
+                <td>{{ mensaje.MENSAJES_NEGATIVOS }}</td>
+                <td>{{ mensaje.MENSAJES_NEUTROS }}</td>
+            </tr>
+            {% for mensaje_texto in mensaje.MENSAJES_TEXTO %}
+            <tr>
+                <td colspan="4">{{ mensaje_texto }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

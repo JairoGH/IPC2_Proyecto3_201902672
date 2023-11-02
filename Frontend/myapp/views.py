@@ -231,3 +231,57 @@ def stats_menciones(request):
         contexto['usuarios_data'] = usuarios_data
         
     return render(request, "stats_menciones.html", contexto)
+
+def get_sentimientos(request):
+    start_date_str = request.GET.get('startDate')
+    end_date_str = request.GET.get('endDate')
+
+    contexto = {
+        'mensajes': [],
+        'startDate': start_date_str,
+        'endDate': end_date_str
+    }
+
+    try:
+        api_url = "http://localhost:5000/get_messages"  # Reemplaza con la URL de tu API
+
+        params = {}
+        if start_date_str:
+            start_date_api = datetime.strptime(start_date_str, "%Y-%m-%d").strftime("%d/%m/%Y")
+            params['startDate'] = start_date_api
+
+        if end_date_str:
+            end_date_api = datetime.strptime(end_date_str, "%Y-%m-%d").strftime("%d/%m/%Y")
+            params['endDate'] = end_date_api
+
+        response = requests.get(api_url, params=params)
+
+        if response.status_code == 200:
+            try:
+                mensajes = response.json()
+                contexto['mensajes'] = mensajes
+
+            except json.JSONDecodeError as e:
+                print("Error al cargar JSON:", str(e))
+        else:
+            print("Error al obtener los datos de la API")
+
+    except ValueError as e:
+        print("Error en el formato de las fechas:", str(e))
+
+    return render(request, "get_sentimientos.html", contexto)
+
+
+def stats_sentimientos(request):
+    contexto = {
+        'response': []
+    }
+    
+    # Reemplaza la URL por la URL de tu API para obtener las estadísticas de sentimiento
+    response = requests.get(url + "/stats_sentimientos")
+    
+    if response.status_code == 200:
+        data = response.json()
+        contexto['response'] = data
+        
+    return render(request, "stats_sentimientos.html", contexto)

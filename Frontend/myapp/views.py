@@ -23,7 +23,8 @@ def index(request):
 def upload_m(request):
     response_content = None
     if request.method == "POST":
-        # Obtener el archivo XML cargado
+
+        #Obtener el archivo XML cargado
         xml_file = request.FILES.get('xmlFile')  
         if xml_file:
             content = xml_file.read().decode('utf-8')           
@@ -39,12 +40,12 @@ def upload_m(request):
             }
             response = requests.post(api_url, data=content, headers=headers)
             
-            # Verificar la respuesta de la API
+            #Verificar la respuesta de la API
             if response.status_code == 200:
                 response_content = response.text
             else:
                 return JsonResponse({"error": "Error al enviar datos a la API."}, status=400)
-                # Enviar el contenido de la respuesta 
+                #Enviar el contenido de la respuesta 
     return render(request, 'upload_m.html', {'response_content': response_content})  
 
 #Funcion para cargar los datos de Config de la API
@@ -153,7 +154,7 @@ def get_hashtags(request):
 
     return render(request, "get_hashtags.html", contexto)
 
-
+#Funcion con la que se obtiene la informacion de las menciones en los mensajes
 def get_menciones(request):
     start_date_str = request.GET.get('startDate')
     end_date_str = request.GET.get('endDate')
@@ -198,13 +199,16 @@ def get_menciones(request):
 
     return render(request, "get_menciones.html", contexto)
 
+#Funcion con la que muestro la pagina de informacion del estudiante
 def info_estudiante(request):
     return render(request, "info_estudiante.html")
 
+
+#Funcion con la que se obtienen las estadisticas de los hashtags
 def stats_hashtags(request):
     contexto = {
         'response': [],
-        'hashtags_data': []  # Agrega esta variable para los hashtags utilizados
+        'hashtags_data': []
     }
     response = requests.get(url + "/stats_hashtags")
     
@@ -213,7 +217,7 @@ def stats_hashtags(request):
         contexto['response'] = data
         hashtags_data = []
 
-        # Itera a través de los datos para obtener los hashtags y su conteo
+        #Recorro a través de los datos para obtener los hashtags y su conteo
         for item in data:
             fecha = item['FECHA']
             hashtags = item['HASHTAGS']
@@ -223,10 +227,11 @@ def stats_hashtags(request):
         
     return render(request, "stats_hashtags.html", contexto)
 
+#Funcion con la que se obtienen las estadisticas de las menciones
 def stats_menciones(request):
     contexto = {
         'response': [],
-        'usuarios_data': []  # Agrega esta variable para los usuarios mencionados
+        'usuarios_data': []
     }
     response = requests.get(url + "/stats_menciones")
     
@@ -235,7 +240,7 @@ def stats_menciones(request):
         contexto['response'] = data
         usuarios_data = []
 
-        # Itera a través de los datos para obtener los usuarios mencionados y su conteo
+        #Recorre a través de los datos para obtener los usuarios mencionados y su conteo
         for item in data:
             fecha = item['Fecha']
             usuarios = item['usuarios']
@@ -245,6 +250,7 @@ def stats_menciones(request):
         
     return render(request, "stats_menciones.html", contexto)
 
+#Funcion con la que se obtienen la informacion de los sentimientos en los mensajes
 def get_sentimientos(request):
     start_date_str = request.GET.get('startDate')
     end_date_str = request.GET.get('endDate')
@@ -256,7 +262,7 @@ def get_sentimientos(request):
     }
 
     try:
-        api_url = "http://localhost:5000/get_messages"  # Reemplaza con la URL de tu API
+        api_url = "http://localhost:5000/get_messages"
 
         params = {}
         if start_date_str:
@@ -284,13 +290,12 @@ def get_sentimientos(request):
 
     return render(request, "get_sentimientos.html", contexto)
 
-
+#Funcion con la que se obtienen las estadisticas de los sentimientos
 def stats_sentimientos(request):
     contexto = {
         'response': []
     }
     
-    # Reemplaza la URL por la URL de tu API para obtener las estadísticas de sentimiento
     response = requests.get(url + "/stats_sentimientos")
     
     if response.status_code == 200:

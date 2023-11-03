@@ -32,21 +32,23 @@ def grabar_msg():
     else:
         elementos = ET.Element('MENSAJES')
 
-    # Inicializar un conjunto para realizar un seguimiento de los textos de los mensajes existentes
+    #Se inicializa un conjunto para realizar un seguimiento de los textos de los mensajes existentes
     textos_existentes = set(elemento.find('TEXTO').text for elemento in elementos.findall('MENSAJE'))
 
-    # Inicializar contadores para usuarios y hashtags
+    #Se inicializa los contadores para usuarios y hashtags
     usuario_count = 0
     hashtag_count = 0
     fechas = []
 
-    # Definir expresiones regulares
+    #Defino los patrones para encontrar usuarios, hashtags y fechas (DD/MM/YYYY)
     usuario_pattern = r'@[\w_]+'
     hashtag_pattern = r'#[\w]+#'
-    fecha_pattern = r'\d{2}/\d{2}/\d{4}'  # Formato DD/MM/YYYY
+    fecha_pattern = r'\d{2}/\d{2}/\d{4}'
 
-    mensajes_grabados = 0  # Para llevar un registro de los mensajes grabados
-    mensajes_duplicados = 0  # Para llevar un registro de los mensajes duplicados
+    # Para llevar un registro de los mensajes grabados
+    mensajes_grabados = 0  
+    # Para llevar un registro de los mensajes duplicados
+    mensajes_duplicados = 0  
 
     # Recorremos el archivo XML
     for mensaje in root.findall('MENSAJE'):
@@ -54,10 +56,11 @@ def grabar_msg():
 
         # Verificar si el mensaje ya existe en el archivo
         if cont_msg in textos_existentes:
-            mensajes_duplicados += 1  # Incrementar el contador de mensajes duplicados
-            continue  # Mensaje duplicado, omitir
+            mensajes_duplicados += 1  
+            continue
 
-        fecha_node = mensaje.find('FECHA')  # Obtener el nodo de fecha
+        #Obtiene el nodo de fecha
+        fecha_node = mensaje.find('FECHA')  
 
         if fecha_node is not None:
             fecha_text = fecha_node.text
@@ -66,34 +69,43 @@ def grabar_msg():
             if fecha_match:
                 fecha = fecha_match.group()
                 fechas.append(fecha)
-                fecha_node.text = fecha  # Actualizar el texto de la fecha al formato DD/MM/YYYY
+
+                # Actualizar el texto de la fecha al formato DD/MM/YYYY
+                fecha_node.text = fecha  
 
         # Crear la estructura del mensaje en el XML
         elemento = ET.SubElement(elementos, 'MENSAJE')
-        ET.SubElement(elemento, "FECHA").text = fecha_text  # Agregar la fecha original
+        ET.SubElement(elemento, "FECHA").text = fecha_text
         ET.SubElement(elemento, "TEXTO").text = cont_msg
 
         # Agregar las fechas, usuarios y hashtags al mensaje
         for usuario in re.findall(usuario_pattern, cont_msg):
             ET.SubElement(elemento, "USUARIO_EN_MENSAJE").text = usuario
-            usuario_count += 1  # Actualizar el contador de usuarios
+            
+            #Actualizar el contador de usuarios
+            usuario_count += 1  
+
         for hashtag in re.findall(hashtag_pattern, cont_msg):
             ET.SubElement(elemento, "HASHTAG_EN_MENSAJE").text = hashtag
-            hashtag_count += 1  # Actualizar el contador de hashtags
+            
+            #Actualizar el contador de hashtags
+            hashtag_count += 1  
 
-        textos_existentes.add(cont_msg)  # Agregar el texto del nuevo mensaje al conjunto
+        #Agregar el texto del nuevo mensaje al conjunto
+        textos_existentes.add(cont_msg)  
 
-        mensajes_grabados += 1  # Incrementar el contador de mensajes grabados
+        #Incrementar el contador de mensajes grabados
+        mensajes_grabados += 1  
 
-    # Guardar el archivo XML
+    #Guardar el archivo XML
     tree = ET.ElementTree(elementos)
     tree.write(xml_file)
 
-    # Crear la estructura XML de respuesta
+    #Crear la estructura XML de respuesta
     respuesta_xml = ET.Element('MENSAJES_RECIBIDOS')
     tiempo = ET.SubElement(respuesta_xml, 'TIEMPO')
 
-    # Comprobar si se encontraron fechas y agregarlas a la respuesta
+    #Comprobar si se encontraron fechas y agregarlas a la respuesta
     if fechas:
         ET.SubElement(tiempo, 'FECHAS').text = ', '.join(fechas)
     else:
@@ -103,21 +115,15 @@ def grabar_msg():
     ET.SubElement(tiempo, 'USR_MENCIONADOS').text = str(usuario_count)
     ET.SubElement(tiempo, 'HASH_INCLUIDOS').text = str(hashtag_count)
 
-    # Agregar un mensaje que indique los mensajes duplicados, si los hay
+    #Agregar un mensaje que indique los mensajes duplicados, si los hay
     if mensajes_duplicados > 0:
         ET.SubElement(tiempo, 'MENSAJES_DUPLICADOS').text = f"{mensajes_duplicados} mensajes ya están registrados."
 
-    # Serializar la estructura XML de respuesta a una cadena y retornarla
+    #Mostrar la estructura XML de respuesta a una cadena y retornarla
     respuesta_str = ET.tostring(respuesta_xml, encoding='unicode')
     return respuesta_str, 200, {'Content-Type': 'application/xml'}
     
-def is_date(dates):
-    pattern = r'^\d{2}\/\d{2}\/\d{4}$'    
-    return re.match(pattern, dates) is not None
 
-def is_user(cont_msg):
-    pattern_user = r'(@\w+)'
-    return re.match(pattern_user, cont_msg) is not None
 
 #Metodo POST para grabar la configuracion!
 @app.route('/grabarConfiguracion', methods=['POST']) 
@@ -126,7 +132,7 @@ def grabar_config():
     xml_data_config = request.data
     root = ET.fromstring(xml_data_config)
 
-    # Cargar el XML existente si existe
+    #Cargar el XML existente si existe
     if os.path.exists(xml_config):
         tree = ET.parse(xml_config)
         elementos = tree.getroot()
@@ -143,11 +149,11 @@ def grabar_config():
     if sentimientos_negativos is None:
         sentimientos_negativos = ET.SubElement(elementos, 'sentimientos_negativos')
 
-    # Lista para almacenar sentimientos duplicados
+    #Lista para almacenar sentimientos duplicados
     sentimientos_duplicados_positivos = []
     sentimientos_duplicados_negativos = []
 
-    # Procesar sentimientos positivos
+    #Procesar sentimientos positivos
     for config in root.find('sentimientos_positivos'):
         palabra_pos = config.text.strip()  # Eliminar espacios en blanco alrededor de la palabra
         if palabra_pos not in [palabra.text.strip() for palabra in sentimientos_positivos.findall('palabra')]:
@@ -155,7 +161,7 @@ def grabar_config():
         else:
             sentimientos_duplicados_positivos.append(palabra_pos)
     
-    # Procesar sentimientos negativos
+    #Procesar sentimientos negativos
     for confi in root.find('sentimientos_negativos'):
         palabra_neg = confi.text.strip()  # Eliminar espacios en blanco alrededor de la palabra
         if palabra_neg not in [palabra.text.strip() for palabra in sentimientos_negativos.findall('palabra')]:
@@ -169,17 +175,17 @@ def grabar_config():
     tree = ET.ElementTree(elementos)
     tree.write(xml_config)
 
-    # Crear la estructura XML de respuesta
+    #Crear la estructura XML de respuesta
     respuesta = ET.Element("CONFIG_RECIBIDA")
     ET.SubElement(respuesta, "PALABRAS_POSITIVAS").text = str(len(sentimientos_positivos.findall('palabra')))
     ET.SubElement(respuesta, "PALABRAS_POSITIVAS_RECHAZADA").text = str(len(sentimientos_duplicados_positivos))
     ET.SubElement(respuesta, "PALABRAS_NEGATIVAS").text = str(len(sentimientos_negativos.findall('palabra')))
     ET.SubElement(respuesta, "PALABRAS_NEGATIVAS_RECHAZADA").text = str(len(sentimientos_duplicados_negativos))
 
-    # Convierte la respuesta XML en una cadena
+    #Convierte la respuesta XML en una cadena
     response_xml = ET.tostring(respuesta, encoding='utf8', method='xml')
     
-    # Retorna la respuesta con el tipo de contenido adecuado
+    #Retorna la respuesta con el tipo de contenido adecuado
     return response_xml, 200, {'Content-Type': 'application/xml'}
 
 
@@ -246,22 +252,22 @@ def mostrar_config_json():
 @app.route('/limpiarDatos', methods=['POST'])
 def borrar_archivos():
     try:
-        # Comprobar si el archivo XML de mensajes existe y borrarlo si es así
+        #Comprobar si el archivo XML de mensajes existe y borrarlo si es así
         if os.path.exists(xml_file):
             os.remove(xml_file)
 
-        # Comprobar si el archivo XML de configuraciones existe y borrarlo si es así
+        #Comprobar si el archivo XML de configuraciones existe y borrarlo si es así
         if os.path.exists(xml_config):
             os.remove(xml_config)
 
-        # Crear la estructura XML de respuesta
+        #Crear la estructura XML de respuesta
         respuesta = ET.Element("ARCHIVOS_BORRADOS")
         ET.SubElement(respuesta, "MENSAJE").text = "Los archivos bd.xml y config.xml han sido borrados."
 
-        # Convierte la respuesta XML en una cadena
+        #Convierte la respuesta XML en una cadena
         response_xml = ET.tostring(respuesta, encoding='utf8', method='xml')
 
-        # Retorna la respuesta con el tipo de contenido adecuado
+        #Retorna la respuesta con el tipo de contenido adecuado
         return response_xml, 200, {'Content-Type': 'application/xml'}
 
     except Exception as e:
@@ -270,30 +276,32 @@ def borrar_archivos():
 #Metodo GET que devolvera los Hashtags grabados con su fecha y en cuantos mensajes se menciono
 @app.route('/devolverHashtags', methods=['GET'])
 def get_hashtags():
-    # Comprobar si el archivo XML existe
+    #Comprobar si el archivo XML existe
     if not os.path.exists(xml_file):
         return jsonify({"message": "No existe el archivo XML"}), 404
 
-    # Comprobar si el archivo XML está vacío
+    #Comprobar si el archivo XML está vacío
     if os.path.getsize(xml_file) == 0:
         return jsonify({"message": "El archivo XML está vacío"}), 404
 
-    # Cargar XML existente
+    #Cargar XML existente
     tree = ET.parse(xml_file)
     elementos = tree.getroot()
     result_msg = []
 
-    # Inicializar un diccionario para realizar un seguimiento de los hashtags existentes y su frecuencia
+    #Inicializar un diccionario para realizar un seguimiento de los hashtags existentes y su frecuencia
     hashtags_existentes = defaultdict(int)
 
-    # Recorrer los mensajes
+    #Recorrer los mensajes
     for elemento in elementos.findall('MENSAJE'):
         fecha_text = elemento.find('FECHA').text
-        fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()  # Extraer la fecha en formato "DD/MM/YYYY"
+
+        #Extraer la fecha en formato "DD/MM/YYYY"
+        fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()  
 
         cont_msg = elemento.find('TEXTO').text
 
-        # Buscar hashtags en el mensaje
+        #Buscar hashtags en el mensaje
         hashtags = [hashtag.lower() for hashtag in re.findall(r'#\w+#', cont_msg)]
 
         for hashtag in hashtags:
@@ -304,14 +312,14 @@ def get_hashtags():
             "HASHTAGS": []
         }
 
-        # Agregar hashtags y conteo al mensaje
+        #Agregar hashtags y conteo al mensaje
         for hashtag in hashtags:
             msg_data["HASHTAGS"].append(hashtag)
             msg_data["HASHTAGS"].append(f"{hashtags_existentes[hashtag]}")
 
         result_msg.append(msg_data)
 
-    # Filtrar los resultados por fecha en formato "DD/MM/YYYY"
+    #Filtrar los resultados por fecha en formato "DD/MM/YYYY"
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
 
@@ -325,40 +333,40 @@ def get_hashtags():
             if start_date <= msg_date <= end_date:
                 filtered_results.append(msg)
 
-        # Crear una lista de hashtags y sus conteos para los mensajes filtrados
+        #Crear una lista de hashtags y sus conteos para los mensajes filtrados
         hashtags_list = [{"hashtag": hashtag, "count": count} for msg in filtered_results for hashtag, count in zip(msg['HASHTAGS'][::2], msg['HASHTAGS'][1::2])]
 
         return jsonify(filtered_results), 200
     else:
-        # Si no se proporcionaron fechas de inicio y fin, devolver todos los resultados
+        #Si no se proporcionaron fechas de inicio y fin, devolver todos los resultados
         return jsonify(result_msg), 200
 
 
 #Metodo GET que devolvera los Usuarios grabados con su fecha y en cuantos mensajes se menciono  
 @app.route('/devolverMenciones', methods=['GET'])
 def get_menciones():
-    # Comprobar si el archivo XML existe
+    #Comprobar si el archivo XML existe
     if not os.path.exists(xml_file):
         return jsonify({"message": "No existe el archivo XML"}), 404
 
-    # Cargar XML existente
+    #Cargar XML existente
     tree = ET.parse(xml_file)
     elementos = tree.getroot()
     menciones_por_fecha = defaultdict(list)
 
-    # Recorrer los mensajes
+    #Recorrer los mensajes
     for elemento in elementos.findall('MENSAJE'):
         mensaje_text = elemento.find('TEXTO').text
         fecha_text = elemento.find('FECHA').text
         fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()
 
-        # Encuentra menciones en el mensaje (suponiendo que las menciones tienen el formato '@usuario')
+        #Encuentra menciones en el mensaje (suponiendo que las menciones tienen el formato '@usuario')
         menciones = re.findall(r'@(\w+)', mensaje_text)
 
         for mencion in menciones:
             menciones_por_fecha[fecha].append(mencion)
 
-    # Filtrar los resultados por fecha en formato "DD/MM/YYYY"
+    #Filtrar los resultados por fecha en formato "DD/MM/YYYY"
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
     
@@ -374,7 +382,7 @@ def get_menciones():
     else:
         filtered_menciones_por_fecha = menciones_por_fecha
 
-    # Convierte el diccionario de menciones por fecha a un formato de respuesta
+    #Convierte el diccionario de menciones por fecha a un formato de respuesta
     result_msg = []
     for fecha, menciones in filtered_menciones_por_fecha.items():
         menciones_usuario = defaultdict(int)
@@ -386,7 +394,7 @@ def get_menciones():
     return jsonify(result_msg), 200
 
 
-# Método GET para devolver las estadísticas de hashtags
+#Método GET para devolver las estadísticas de hashtags
 @app.route('/stats_hashtags', methods=['GET'])
 def stats_hashtags():
     if not os.path.exists(xml_file):
@@ -411,7 +419,7 @@ def stats_hashtags():
         for hashtag in hashtags:
             hashtag_data[fecha].append(hashtag)
 
-    # Convertir el diccionario a un formato de respuesta
+    #Convertir el diccionario a un formato de respuesta
     response_data = []
     for fecha, hashtags in hashtag_data.items():
         hashtags_count = {hashtag: hashtags.count(hashtag) for hashtag in set(hashtags)}
@@ -423,31 +431,31 @@ def stats_hashtags():
 
     return jsonify(response_data), 200
 
-# Método GET que devolverá los usuarios mencionados con su fecha y cuántas veces fueron mencionados
+#Método GET que devolverá los usuarios mencionados con su fecha y cuántas veces fueron mencionados
 @app.route('/stats_menciones', methods=['GET'])
 def stats_menciones():
     # Comprobar si el archivo XML existe
     if not os.path.exists(xml_file):
         return jsonify({"message": "No existe el archivo XML"}), 404
 
-    # Cargar el XML existente
+    #Cargar el XML existente
     tree = ET.parse(xml_file)
     elementos = tree.getroot()
     menciones_por_fecha = defaultdict(list)
 
-    # Recorrer los mensajes
+    #Recorrer los mensajes
     for elemento in elementos.findall('MENSAJE'):
         mensaje_text = elemento.find('TEXTO').text
         fecha_text = elemento.find('FECHA').text
         fecha = re.search(r'\d{2}/\d{2}/\d{4}', fecha_text).group()
 
-        # Encuentra menciones en el mensaje (suponiendo que las menciones tienen el formato '@usuario')
+        #Encuentra menciones en el mensaje (suponiendo que las menciones tienen el formato '@usuario')
         menciones = re.findall(r'@(\w+)', mensaje_text)
 
         for mencion in menciones:
             menciones_por_fecha[fecha].append(mencion)
 
-    # Filtrar los resultados por fecha en formato "DD/MM/YYYY"
+    #Filtrar los resultados por fecha en formato "DD/MM/YYYY"
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
 
@@ -463,7 +471,7 @@ def stats_menciones():
     else:
         filtered_menciones_por_fecha = menciones_por_fecha
 
-    # Convierte el diccionario de menciones por fecha a un formato de respuesta
+    #Convierte el diccionario de menciones por fecha a un formato de respuesta
     result_msg = []
     for fecha, menciones in filtered_menciones_por_fecha.items():
         menciones_usuario = defaultdict(int)
@@ -476,7 +484,7 @@ def stats_menciones():
 
 
 
-# Ruta GET para obtener mensajes clasificados por sentimiento
+#Ruta GET para obtener mensajes clasificados por sentimiento
 @app.route('/get_messages', methods=['GET'])
 def get_messages():
     if not os.path.exists(xml_file):
@@ -512,10 +520,10 @@ def get_messages():
         if fecha:
             fecha = fecha.group()
 
-            # Inicializar el diccionario anidado con valores iniciales
+            #Inicializar el diccionario anidado con valores iniciales
             mensajes_por_fecha[fecha] = {"positivos": 0, "negativos": 0, "neutros": 0, "mensajes_texto": [], "numeros_mensaje": []}
 
-            # Analizar el mensaje en busca de palabras clave de sentimientos
+            #Analizar el mensaje en busca de palabras clave de sentimientos
             palabras = mensaje_text.split()
             sentimiento = "neutros"
 
@@ -565,7 +573,7 @@ def get_messages():
     else:
         filtered_mensajes_por_fecha = mensajes_por_fecha
 
-    # Genera la respuesta JSON
+    #Genera la respuesta JSON
     result_msg = []
     for fecha, mensajes in filtered_mensajes_por_fecha.items():
         fecha_obj = datetime.strptime(fecha, "%d/%m/%Y")
@@ -589,7 +597,7 @@ def get_messages():
     return jsonify(result_msg), 200
 
 
-# Método GET para devolver estadísticas de sentimientos
+#Método GET para devolver estadísticas de sentimientos
 @app.route('/stats_sentimientos', methods=['GET'])
 def stats_sentimientos():
     if not os.path.exists(xml_file):
